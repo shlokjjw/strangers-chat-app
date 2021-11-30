@@ -12,6 +12,8 @@ const io = new Server(server)
 
 let messages = []
 
+const PORT = process.env.PORT || 3000
+
 let base64image = ""
 
 app.get('/',(req,res) => {
@@ -50,6 +52,6 @@ io.on('connection',(socket) => {
     })
 })
 
-server.listen(3000,() => {
+server.listen(PORT,() => {
     console.log("Server is listening on port 3000")
 }) 
