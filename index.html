@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="text-center">
+            Live Realtime Group Chat About Images Online
+        </h1>
+        <div class="form-group">
+            <label for="image">Choose Image:</label>
+            <input type="file" accept="image/*" id="file" class="form-control">
+        </div>
+        <img id="img" alt="">
+        <div class="form-group">
+            <textarea id="chats" cols="30" rows="10" class="form-control"></textarea>
+        </div>
+        <div class="form-group">
+            <input type="text" id="message" placeholder="Enter your message" required class="form-control">
+        </div>
+        <div class="form-group">
+            <button id="button" class="btn btn-block btn-danger">
+                Send Message
+            </button>
+        </div>
+    </div>
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="socket.io/socket.io.js"></script>
+<script>
+    let socket = io()
+    let username = ""
+    username = window.prompt("Please Enter Your Username");
+
+    console.log(username)
+    if(username == "" || username == null){
+
+        username = "User" +  Math.floor(Math.random() * 1000)
+    }
+
+    socket.emit('username',username)
+
+    console.log(username)
+    document.getElementById('file').addEventListener('change', function () {
+ 
+        const reader = new FileReader();
+        reader.onload = function () {
+            const base64 = this.result.replace(/.*base64,/, '');
+            console.log(base64)
+            let base64string = "data:image/jpeg;charset=utf-8;base64," + base64
+            socket.emit('image', base64string);
+        };
+        reader.readAsDataURL(this.files[0]);
+
+    }, false);
+
+    document.getElementById('button').addEventListener('click',() => {
+        var message = document.getElementById('message').value
+
+        if(message == ""){
+            alert("Please enter some message")
+        }else{
+
+        document.getElementById('message').value = ""
+
+        socket.emit('message',message)
+        }
+    })
+
+    socket.on('message',(data) => {
+        $("#chats").append(data + "\n")
+    })
+
+    socket.on('oldmessages',(data) => {
+        $("#chats").append(data + "\n")
+    })
+
+    socket.on('oldimage',(data) => {
+        console.log(data)
+        document.getElementById('img').src=data
+    })
+
+    socket.on('image',(data) => {
+        console.log(data)
+        document.getElementById('img').src = data
+    })
+
+</script>
+
+</html>
